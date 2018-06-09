@@ -35,7 +35,7 @@ private:
 		float ReloadTimeInSeconds = 2;
 
 	UPROPERTY(EditDefaultsOnly, Category = Firing)
-		float LaunchSpeed = 100; //10000;
+		float LaunchSpeed = 3000; // 30 m/s
 
 	UPROPERTY(EditDefaultsOnly, Category = Setup)
 		UClass* Projectile_BP;

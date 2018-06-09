@@ -15,6 +15,6 @@ class BOMBSHELL3D_API UBombingGun : public UStaticMeshComponent
 	GENERATED_BODY()
 	
 public:
-	void RotateTowardsAimPoint();
+	void RotateTowardsAimPoint(FRotator AimDirection);
 	
 };

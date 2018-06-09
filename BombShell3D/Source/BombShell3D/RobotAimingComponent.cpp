@@ -57,7 +57,7 @@ void URobotAimingComponent::MoveBombingGun(FVector AimDirection) {
 	auto BarrelRotator = BombingGun->GetForwardVector().Rotation();
 	auto AimAsRotator = AimDirection.Rotation();
 	auto DeltaRotator = AimAsRotator - BarrelRotator;
-	BombingGun->RotateTowardsAimPoint(); //DeltaRotator.Pitch
+	BombingGun->RotateTowardsAimPoint(AimAsRotator); //DeltaRotator.Pitch
 }
 
 void URobotAimingComponent::SetBombingGunReference(UBombingGun* BombingGunToSet) {

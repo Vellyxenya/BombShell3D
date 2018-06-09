@@ -32,5 +32,5 @@ private:
 		float CrosshairY = 0.4f;
 
 	UPROPERTY(EditAnywhere)
-		float LineTraceRange = 1000; //10 m.
+		float LineTraceRange = 100000; //1000 m.
 };

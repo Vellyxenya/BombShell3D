@@ -26,6 +26,7 @@ void ARobot::Fire() {
 			BombingGun->GetSocketLocation(FName("ProjectileLaunchPoint")),
 			BombingGun->GetSocketRotation(FName("ProjectileLaunchPoint"))
 			);
+		UE_LOG(LogTemp, Warning, TEXT("ALSKJFAéLSJFDéAJFLSAJDFAS"));
 		if (!ensure(Projectile != nullptr)) return;
 		Projectile->GetFired(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();

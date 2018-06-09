@@ -2,8 +2,6 @@
 
 #include "BombingGun.h"
 
-void UBombingGun::RotateTowardsAimPoint() {
-	UE_LOG(LogTemp, Warning, TEXT("Rotating towards aim point"));
+void UBombingGun::RotateTowardsAimPoint(FRotator AimDirection) {
+	SetWorldRotation(AimDirection);
 }
-
-
