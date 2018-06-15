@@ -33,6 +33,11 @@ void ARobot::Fire() {
 	}
 }
 
+void ARobot::PutBomb() {
+	//TODO : this function puts bomb if the crosshair is aiming at a certain range.
+	//No projectiles involved
+}
+
 void ARobot::AimAt(FVector HitLocation) {
 	RobotAimingComponent->AimAt(HitLocation, LaunchSpeed);
 }

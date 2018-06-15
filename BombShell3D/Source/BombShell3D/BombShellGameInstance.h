@@ -22,9 +22,17 @@ public:
 
 	UFUNCTION()
 		void LoadSelectionMenu() override;
+
+	UFUNCTION(BlueprintCallable)
+		void DisplayUI();
+
+	UFUNCTION(BlueprintCallable)
+		bool AskPlayerController();
 	
 private:
 	TSubclassOf<class UUserWidget> MainMenuClass;
-
 	class UMainMenu_CPP* MainMenu;
+
+	TSubclassOf<class UUserWidget> UIClass;
+	class UUI_CPP* UI;
 };

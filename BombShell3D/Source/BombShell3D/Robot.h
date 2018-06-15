@@ -25,6 +25,8 @@ public:
 	UFUNCTION(BlueprintCallable, Category = Input)
 		void Fire();
 
+	void PutBomb();
+
 protected:
 	URobotAimingComponent * RobotAimingComponent = nullptr;
 

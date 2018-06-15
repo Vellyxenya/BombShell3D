@@ -12,6 +12,10 @@ class BOMBSHELL3D_API APlayerController_CPP : public APlayerController
 {
 	GENERATED_BODY()
 	
+public:
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+		bool bCanPutBomb = false;
+
 private:
 	ARobot * GetControlledRobot() const;
 	
@@ -25,6 +29,8 @@ private:
 
 	bool GetLookVectorHitLocation(FVector LookDirection, OUT FVector & HitLocation) const;
 
+	float GetDistanceToAimPoint() const;
+
 	UPROPERTY(EditAnywhere)
 		float CrosshairX = 0.5f;
 
@@ -33,4 +39,7 @@ private:
 
 	UPROPERTY(EditAnywhere)
 		float LineTraceRange = 100000; //1000 m.
+
+	UPROPERTY(EditAnywhere)
+		float PutBombRange = 1000; //10 m.
 };

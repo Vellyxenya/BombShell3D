@@ -3,12 +3,21 @@
 #include "PlayerController_CPP.h"
 #include "Robot.h"
 #include "Engine/World.h"
+#include "ConstructorHelpers.h"
+#include "UserWidget.h"
+#include "BombShellGameInstance.h"
 
 #define OUT
 
 void APlayerController_CPP::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	AimTowardsCrosshair();
+
+	if (GetDistanceToAimPoint() <= PutBombRange) {
+		bCanPutBomb = true;
+	} else {
+		bCanPutBomb = false;
+	}
 }
 
 ARobot * APlayerController_CPP::GetControlledRobot() const {
@@ -33,6 +42,14 @@ bool APlayerController_CPP::GetSightRayHitLocation(OUT FVector& HitLocation) con
 		GetLookVectorHitLocation(LookDirection, HitLocation);
 	}
 	return true;
+}
+
+float APlayerController_CPP::GetDistanceToAimPoint() const {
+	FVector ActorLocation = APlayerController_CPP::GetControlledRobot()->GetActorLocation();
+	FVector HitLocation;
+	APlayerController_CPP::GetSightRayHitLocation(HitLocation);
+	FVector DistanceVector = HitLocation - ActorLocation;
+	return DistanceVector.Size();
 }
 
 bool APlayerController_CPP::GetLookDirection(FVector2D ScreenLocation, FVector& LookDirection) const {

@@ -6,15 +6,35 @@
 #include "Engine/Engine.h"
 #include "UObject/ConstructorHelpers.h"
 #include "Blueprint/UserWidget.h"
+#include "UI_CPP.h"
+#include "PlayerController_CPP.h"
 
 UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & ObjectInitializer) {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/Menus/MainMenu_BP"));
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
 	MainMenuClass = MenuBPClass.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> UIBPClass(TEXT("/Game/Display/UI/BombingGun_UI"));
+	if (!ensure(UIBPClass.Class != nullptr)) return;
+	UIClass = UIBPClass.Class;
 }
 
 void UBombShellGameInstance::Init() {
 	UE_LOG(LogTemp, Warning, TEXT("MainMenuClassName : %s"), *MainMenuClass->GetName());
+}
+
+bool UBombShellGameInstance::AskPlayerController() {
+	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	if (!ensure(PlayerController != nullptr)) return false;
+	return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;
+}
+
+void UBombShellGameInstance::DisplayUI() {
+	if (!ensure(UIClass != nullptr)) return;
+	UI = CreateWidget<UUI_CPP>(this, UIClass);
+	if (!ensure(UI != nullptr)) return;
+	UI->AddToViewport(2);
+	UE_LOG(LogTemp, Warning, TEXT("DISPLAY UI"));
 }
 
 void UBombShellGameInstance::LoadMainMenu() {
