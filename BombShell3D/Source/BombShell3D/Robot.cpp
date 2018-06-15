@@ -21,7 +21,7 @@ void ARobot::SetBombingGunReference(UBombingGun * BombingGunToSet) {
 }
 
 void ARobot::Fire() {
-	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
+	/*bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
 
 	if (BombingGun && isReloaded) {
 		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
@@ -33,24 +33,19 @@ void ARobot::Fire() {
 		if (!ensure(Projectile != nullptr)) return;
 		Projectile->GetFired(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
-	}
-	//PutBomb();
+	}*/
+	PutBomb();
 }
 
 void ARobot::PutBomb() {
 	//TODO : this function puts bomb if the crosshair is aiming at a certain range.
 	//No projectiles involved
-
 	if (Cast<APlayerController_CPP>(GetController())->bCanPutBomb) {
 		FVector AimPoint = Cast<APlayerController_CPP>(GetController())->HitLocation;
-		FRotator Rotation = FRotator();
-		GetWorld()->SpawnActor<ABomb>(Bomb_BP, AimPoint, Rotation);
+		GetWorld()->SpawnActor<ABomb>(Bomb_BP, AimPoint, GetActorRotation());
 	}
 }
 
 void ARobot::AimAt(FVector HitLocation) {
 	RobotAimingComponent->AimAt(HitLocation, LaunchSpeed);
 }
-
-
-
