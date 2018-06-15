@@ -5,6 +5,9 @@
 #include "Engine/World.h"
 #include "BombingGun.h"
 #include "Projectile.h"
+#include "GameFramework/Pawn.h"
+#include "PlayerController_CPP.h"
+#include "Bomb.h"
 
 ARobot::ARobot() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -31,11 +34,18 @@ void ARobot::Fire() {
 		Projectile->GetFired(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
 	}
+	//PutBomb();
 }
 
 void ARobot::PutBomb() {
 	//TODO : this function puts bomb if the crosshair is aiming at a certain range.
 	//No projectiles involved
+
+	if (Cast<APlayerController_CPP>(GetController())->bCanPutBomb) {
+		FVector AimPoint = Cast<APlayerController_CPP>(GetController())->HitLocation;
+		FRotator Rotation = FRotator();
+		GetWorld()->SpawnActor<ABomb>(Bomb_BP, AimPoint, Rotation);
+	}
 }
 
 void ARobot::AimAt(FVector HitLocation) {

@@ -12,7 +12,8 @@
 void APlayerController_CPP::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 	AimTowardsCrosshair();
-
+	FString name = GetWorld()->GetMapName();
+	//UE_LOG(LogTemp, Warning, TEXT("Level name : %s"), *name);
 	if (GetDistanceToAimPoint() <= PutBombRange) {
 		bCanPutBomb = true;
 	} else {
@@ -27,7 +28,7 @@ ARobot * APlayerController_CPP::GetControlledRobot() const {
 void APlayerController_CPP::AimTowardsCrosshair() {
 	if (!GetControlledRobot()) { return; }
 
-	FVector HitLocation; //Out parameter
+	//HitLocation is an Out parameter
 	GetSightRayHitLocation(HitLocation);
 	GetControlledRobot()->AimAt(HitLocation);
 }
@@ -45,11 +46,14 @@ bool APlayerController_CPP::GetSightRayHitLocation(OUT FVector& HitLocation) con
 }
 
 float APlayerController_CPP::GetDistanceToAimPoint() const {
-	FVector ActorLocation = APlayerController_CPP::GetControlledRobot()->GetActorLocation();
-	FVector HitLocation;
-	APlayerController_CPP::GetSightRayHitLocation(HitLocation);
-	FVector DistanceVector = HitLocation - ActorLocation;
-	return DistanceVector.Size();
+	if (GetControlledRobot() != nullptr) {
+		FVector ActorLocation = GetControlledRobot()->GetActorLocation();
+		FVector HitLocation;
+		APlayerController_CPP::GetSightRayHitLocation(HitLocation);
+		FVector DistanceVector = HitLocation - ActorLocation;
+		return DistanceVector.Size();
+	}
+	return 9999999;
 }
 
 bool APlayerController_CPP::GetLookDirection(FVector2D ScreenLocation, FVector& LookDirection) const {

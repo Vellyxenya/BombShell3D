@@ -42,6 +42,9 @@ private:
 	UPROPERTY(EditDefaultsOnly, Category = Setup)
 		UClass* Projectile_BP;
 
+	UPROPERTY(EditDefaultsOnly, Category = Setup)
+		UClass* Bomb_BP;
+
 	UBombingGun* BombingGun = nullptr;
 
 };

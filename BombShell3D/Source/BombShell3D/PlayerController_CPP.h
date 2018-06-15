@@ -16,6 +16,8 @@ public:
 	UPROPERTY(EditAnywhere, BlueprintReadWrite)
 		bool bCanPutBomb = false;
 
+	FVector HitLocation;
+
 private:
 	ARobot * GetControlledRobot() const;
 	

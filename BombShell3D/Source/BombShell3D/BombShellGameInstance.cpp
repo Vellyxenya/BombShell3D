@@ -49,6 +49,8 @@ void UBombShellGameInstance::LoadMainMenu() {
 void UBombShellGameInstance::LoadSelectionMenu() {
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
-	PlayerController->ClientTravel("/Game/Maps/SelectionMenu", ETravelType::TRAVEL_Absolute);
+	FInputModeGameOnly Inputmode;
+	PlayerController->SetInputMode(Inputmode);
+	PlayerController->ClientTravel("/Game/Maps/PVPArena", ETravelType::TRAVEL_Absolute);
 }
 
