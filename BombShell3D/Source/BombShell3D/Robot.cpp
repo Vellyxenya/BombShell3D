@@ -42,7 +42,9 @@ void ARobot::PutBomb() {
 	//No projectiles involved
 	if (Cast<APlayerController_CPP>(GetController())->bCanPutBomb) {
 		FVector AimPoint = Cast<APlayerController_CPP>(GetController())->HitLocation;
-		GetWorld()->SpawnActor<ABomb>(Bomb_BP, AimPoint, GetActorRotation());
+		//Alter the original aim point so that it doesn't snap inside the cube. 
+		FVector AlteredAimPoint = AimPoint - (AimPoint - GetActorLocation()).GetSafeNormal() * 0.1;
+		GetWorld()->SpawnActor<ABomb>(Bomb_BP, AlteredAimPoint, GetActorRotation());
 	}
 }
 
