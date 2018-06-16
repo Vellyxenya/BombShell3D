@@ -29,7 +29,6 @@ void APlayerController_CPP::AimTowardsCrosshair() {
 	if (!GetControlledRobot()) { return; }
 
 	//HitLocation is an Out parameter
-	//FVector HitLocation;
 	GetSightRayHitLocation(HitLocation);
 	GetControlledRobot()->AimAt(HitLocation);
 }

@@ -22,7 +22,20 @@ protected:
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
+	
+private:
+	void Explode();
 
-	
-	
+	UPROPERTY(EditDefaultsOnly, Category = ExplosionSetup)
+		UClass* ExplosionRay_BP;
+
+	UPROPERTY(EditDefaultsOnly, Category = RotationTest)
+		float Pitch;
+
+	UPROPERTY(EditDefaultsOnly, Category = RotationTest)
+		float Roll;
+
+	UPROPERTY(EditDefaultsOnly, Category = RotationTest)
+		float Yaw;
 };
+

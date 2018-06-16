@@ -47,4 +47,6 @@ private:
 
 	UBombingGun* BombingGun = nullptr;
 
+	UPROPERTY(EditDefaultsOnly, Category = snapping)
+		double AlterationFactor = 1;
 };
