@@ -17,7 +17,7 @@ void APlayerController_CPP::Tick(float DeltaTime) {
 	if (GetDistanceToAimPoint() <= PutBombRange) {
 		bCanPutBomb = true;
 	} else {
-		bCanPutBomb = false;
+		bCanPutBomb = true;//false; just for testing
 	}
 }
 

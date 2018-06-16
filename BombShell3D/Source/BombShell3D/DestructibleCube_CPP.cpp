@@ -6,8 +6,8 @@
 // Sets default values
 ADestructibleCube_CPP::ADestructibleCube_CPP()
 {
- 	// Set this actor to call Tick() every frame.  You can turn this off to improve performance if you don't need it.
-	PrimaryActorTick.bCanEverTick = true;
+ 	// Set this actor to call Tick() every frame. You can turn this off to improve performance if you don't need it.
+	PrimaryActorTick.bCanEverTick = false;
 
 }
 
@@ -21,6 +21,6 @@ void ADestructibleCube_CPP::BeginPlay()
 void ADestructibleCube_CPP::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
+	
 }
 
