@@ -6,6 +6,8 @@
 #include "GameFramework/Actor.h"
 #include "Bomb.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnExplode);
+
 UCLASS()
 class BOMBSHELL3D_API ABomb : public AActor
 {
@@ -24,7 +26,11 @@ public:
 	virtual void Tick(float DeltaTime) override;
 	
 private:
-	void Explode();
+	void Lock();
+	void CreateExplosions();
+
+	UPROPERTY(BlueprintAssignable)
+		FOnExplode OnExplode;
 
 	UPROPERTY(EditDefaultsOnly, Category = ExplosionSetup)
 		UClass* ExplosionRay_BP;

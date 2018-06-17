@@ -12,8 +12,10 @@ ABomb::ABomb() {
 
 void ABomb::BeginPlay() {
 	Super::BeginPlay();
-	FTimerHandle StartTimer;
-	GetWorldTimerManager().SetTimer(StartTimer, this, &ABomb::Explode, 3);
+	FTimerHandle LockTimer;
+	FTimerHandle ExplosionTimer;
+	GetWorldTimerManager().SetTimer(LockTimer, this, &ABomb::Lock, 3);
+	GetWorldTimerManager().SetTimer(ExplosionTimer, this, &ABomb::CreateExplosions, 5);
 }
 
 void ABomb::Tick(float DeltaTime)
@@ -21,15 +23,21 @@ void ABomb::Tick(float DeltaTime)
 	Super::Tick(DeltaTime);
 }
 
-void ABomb::Explode() {
+void ABomb::Lock() {
+	OnExplode.Broadcast();
+	UE_LOG(LogTemp, Warning, TEXT("Broadcasting"));
+}
+
+void ABomb::CreateExplosions() {
 	UWorld* World = GetWorld();
 	if (World != nullptr) {
+		//GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(Pitch, Roll, Yaw));
 		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(0, 0, 0));
 		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(0, 90, 0));
 		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(0, 180, 0));
 		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(0, 270, 0));
-		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(0, 0, 90));
-		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(0, 0, 270));
-		GetWorld()->DestroyActor(this);
+		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(90, 0, 0));
+		GetWorld()->SpawnActor<AExplosionRay_CPP>(ExplosionRay_BP, GetActorLocation(), FRotator(270, 0, 0));
+		//GetWorld()->DestroyActor(this);
 	}
 }
