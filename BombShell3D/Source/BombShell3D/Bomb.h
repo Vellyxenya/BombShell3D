@@ -27,7 +27,14 @@ public:
 	
 private:
 	void Lock();
-	void CreateExplosions();
+
+	UFUNCTION(BlueprintCallable)
+		void CreateExplosions();
+
+	FVector Location;
+
+	UFUNCTION()
+		void OnOverlap(AActor* ThisActor, AActor* OtherActor);
 
 	UPROPERTY(BlueprintAssignable)
 		FOnExplode OnExplode;
