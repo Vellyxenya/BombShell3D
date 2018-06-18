@@ -49,8 +49,13 @@ void UBombShellGameInstance::LoadMainMenu() {
 void UBombShellGameInstance::LoadSelectionMenu() {
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
-	FInputModeGameOnly Inputmode;
+	PlayerController->bShowMouseCursor = true;
+	PlayerController->bEnableClickEvents = true;
+	PlayerController->bEnableMouseOverEvents = true;
+	
+	//FInputModeGameOnly Inputmode;
+	FInputModeUIOnly Inputmode;
 	PlayerController->SetInputMode(Inputmode);
-	PlayerController->ClientTravel("/Game/Maps/PVPArena", ETravelType::TRAVEL_Absolute);
+	PlayerController->ClientTravel("/Game/Maps/SelectionMenu", ETravelType::TRAVEL_Absolute);
 }
 

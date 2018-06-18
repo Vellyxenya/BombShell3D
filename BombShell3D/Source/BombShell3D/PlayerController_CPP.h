@@ -7,6 +7,8 @@
 #include "Robot.h"
 #include "PlayerController_CPP.generated.h"
 
+class UCubeArrow_CPP;
+
 UCLASS()
 class BOMBSHELL3D_API APlayerController_CPP : public APlayerController
 {
@@ -20,18 +22,20 @@ public:
 
 private:
 	ARobot * GetControlledRobot() const;
+
+	UCubeArrow_CPP* Arrow = nullptr;
 	
 	void Tick(float DeltaTime);
 
 	void AimTowardsCrosshair();
 
-	bool GetSightRayHitLocation(OUT FVector & HitLocation) const;
+	bool GetSightRayHitLocation(OUT FVector & HitLocation);
 
 	bool GetLookDirection(FVector2D ScreenLocation, FVector & LookDirection) const;
 
-	bool GetLookVectorHitLocation(FVector LookDirection, OUT FVector & HitLocation) const;
+	bool GetLookVectorHitLocation(FVector LookDirection, OUT FVector & HitLocation);
 
-	float GetDistanceToAimPoint() const;
+	float GetDistanceToAimPoint();
 
 	UPROPERTY(EditAnywhere)
 		float CrosshairX = 0.5f;

@@ -6,9 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "BombingGun.generated.h"
 
-/**
- * 
- */
+
 UCLASS(meta = (BlueprintSpawnableComponent))
 class BOMBSHELL3D_API UBombingGun : public UStaticMeshComponent
 {
