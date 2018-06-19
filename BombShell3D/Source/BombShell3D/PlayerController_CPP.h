@@ -19,6 +19,7 @@ public:
 		bool bCanPutBomb = false;
 
 	FVector HitLocation;
+	FHitResult HitResult;
 
 private:
 	ARobot * GetControlledRobot() const;
@@ -29,13 +30,16 @@ private:
 
 	void AimTowardsCrosshair();
 
-	bool GetSightRayHitLocation(OUT FVector & HitLocation);
+	bool GetSightRayHitLocation(OUT FVector & HitLocation, OUT FHitResult& HitResult);
 
 	bool GetLookDirection(FVector2D ScreenLocation, FVector & LookDirection) const;
 
-	bool GetLookVectorHitLocation(FVector LookDirection, OUT FVector & HitLocation);
+	bool GetLookVectorHitLocation(FVector LookDirection, OUT FVector & HitLocation, OUT FHitResult& HitResult);
 
 	float GetDistanceToAimPoint();
+
+	UFUNCTION(BlueprintCallable)
+		void HandleInput();
 
 	UPROPERTY(EditAnywhere)
 		float CrosshairX = 0.5f;

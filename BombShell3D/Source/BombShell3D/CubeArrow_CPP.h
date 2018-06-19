@@ -6,6 +6,7 @@
 #include "Components/StaticMeshComponent.h"
 #include "CubeArrow_CPP.generated.h"
 
+//DECLARE_DYNAMIC_MULTICAST_DELEGATE(FComponentBeginCursorOverSignature);
 
 UCLASS(meta=(BlueprintSpawnableComponent))
 class BOMBSHELL3D_API UCubeArrow_CPP : public UStaticMeshComponent
@@ -18,4 +19,7 @@ public:
 
 	UPROPERTY(EditAnywhere)
 		FString ThisName;
+
+	UFUNCTION()
+		void OnHovered(UPrimitiveComponent* Component);
 };

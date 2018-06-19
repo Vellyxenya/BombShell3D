@@ -31,16 +31,17 @@ void UBombShellGameInstance::Init() {
 	UE_LOG(LogTemp, Warning, TEXT("MainMenuClassName : %s"), *MainMenuClass->GetName());
 }
 
-bool UBombShellGameInstance::AskPlayerController() {
+bool UBombShellGameInstance::AskPlayerController() {/*
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	/*if (!ensure(PlayerController != nullptr)) return false;
-	return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;*/
+	//if (!ensure(PlayerController != nullptr)) return false;
+	//return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;
 	if (PlayerController != nullptr) {
 		return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;
 	} else {
 		UE_LOG(LogTemp, Warning, TEXT("No player controller found!"));
 		return false;
-	}
+	}*/
+	return false;
 }
 
 void UBombShellGameInstance::DisplayUI() {

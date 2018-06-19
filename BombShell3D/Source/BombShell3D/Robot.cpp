@@ -52,8 +52,6 @@ void ARobot::Fire() {
 }
 
 void ARobot::PutBomb() {
-	//TODO : this function puts bomb if the crosshair is aiming at a certain range.
-	//No projectiles involved
 	if (Cast<APlayerController_CPP>(GetController())->bCanPutBomb) {
 		FVector AimPoint = Cast<APlayerController_CPP>(GetController())->HitLocation;
 		//Alter the original aim point so that it doesn't snap inside the cube. 

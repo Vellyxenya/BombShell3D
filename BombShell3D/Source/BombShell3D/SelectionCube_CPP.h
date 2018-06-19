@@ -26,6 +26,9 @@ public:
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
+	void RotateAntiClockwise();
+	void RotateClockwise();
+
 	UCubeArrow_CPP* RightArrow;
 	UCubeArrow_CPP* LeftArrow;
 };
