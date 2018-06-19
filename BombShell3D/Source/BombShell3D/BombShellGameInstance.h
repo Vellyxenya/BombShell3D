@@ -7,6 +7,15 @@
 #include "MenuInterface.h"
 #include "BombShellGameInstance.generated.h"
 
+UENUM()
+enum GameStatus
+{
+	MainMenu		UMETA(DisplayName = "MainMenu"),
+	SelectionMenu	UMETA(DisplayName = "SelectionMenu"),
+	Playing			UMETA(DisplayName = "Playing"),
+
+};
+
 UCLASS()
 class BOMBSHELL3D_API UBombShellGameInstance : public UGameInstance, public IMenuInterface
 {
@@ -28,8 +37,13 @@ public:
 
 	UFUNCTION(BlueprintCallable)
 		bool AskPlayerController();
-	
+
+	void SetGameStatus(enum GameStatus Status);
+	enum GameStatus GetGameStatus();
+
 private:
+	enum GameStatus CurrentStatus;
+
 	TSubclassOf<class UUserWidget> MainMenuClass;
 	class UMainMenu_CPP* MainMenu;
 

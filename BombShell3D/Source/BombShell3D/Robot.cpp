@@ -8,6 +8,7 @@
 #include "GameFramework/Pawn.h"
 #include "PlayerController_CPP.h"
 #include "Bomb.h"
+#include "BombShellGameInstance.h"
 
 ARobot::ARobot() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -20,8 +21,22 @@ void ARobot::SetBombingGunReference(UBombingGun * BombingGunToSet) {
 	BombingGun = BombingGunToSet;
 }
 
+void ARobot::HandleInput() {
+	switch (Cast<UBombShellGameInstance>(GetGameInstance())->GetGameStatus())
+	{
+		case GameStatus::SelectionMenu:
+			//PutBomb();
+			break;
+		case GameStatus::Playing:
+			PutBomb();
+			break;
+		default:
+			break;
+	}
+}
+
 void ARobot::Fire() {
-	/*bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
+	bool isReloaded = (FPlatformTime::Seconds() - LastFireTime) > ReloadTimeInSeconds;
 
 	if (BombingGun && isReloaded) {
 		auto Projectile = GetWorld()->SpawnActor<AProjectile>(
@@ -33,8 +48,7 @@ void ARobot::Fire() {
 		if (!ensure(Projectile != nullptr)) return;
 		Projectile->GetFired(LaunchSpeed);
 		LastFireTime = FPlatformTime::Seconds();
-	}*/
-	PutBomb();
+	}
 }
 
 void ARobot::PutBomb() {

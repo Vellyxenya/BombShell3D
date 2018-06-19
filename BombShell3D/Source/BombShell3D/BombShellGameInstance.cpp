@@ -19,14 +19,28 @@ UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & Object
 	UIClass = UIBPClass.Class;
 }
 
+void UBombShellGameInstance::SetGameStatus(enum GameStatus Status) {
+	CurrentStatus = Status;
+}
+
+GameStatus UBombShellGameInstance::GetGameStatus() {
+	return CurrentStatus;
+}
+
 void UBombShellGameInstance::Init() {
 	UE_LOG(LogTemp, Warning, TEXT("MainMenuClassName : %s"), *MainMenuClass->GetName());
 }
 
 bool UBombShellGameInstance::AskPlayerController() {
 	APlayerController* PlayerController = GetFirstLocalPlayerController();
-	if (!ensure(PlayerController != nullptr)) return false;
-	return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;
+	/*if (!ensure(PlayerController != nullptr)) return false;
+	return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;*/
+	if (PlayerController != nullptr) {
+		return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;
+	} else {
+		UE_LOG(LogTemp, Warning, TEXT("No player controller found!"));
+		return false;
+	}
 }
 
 void UBombShellGameInstance::DisplayUI() {
@@ -54,8 +68,9 @@ void UBombShellGameInstance::LoadSelectionMenu() {
 	PlayerController->bEnableMouseOverEvents = true;
 	
 	//FInputModeGameOnly Inputmode;
-	FInputModeUIOnly Inputmode;
+	FInputModeGameOnly Inputmode;
 	PlayerController->SetInputMode(Inputmode);
 	PlayerController->ClientTravel("/Game/Maps/SelectionMenu", ETravelType::TRAVEL_Absolute);
+	SetGameStatus(GameStatus::SelectionMenu);
 }
 

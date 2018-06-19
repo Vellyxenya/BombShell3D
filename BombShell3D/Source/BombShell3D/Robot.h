@@ -23,9 +23,10 @@ public:
 		void SetBombingGunReference(UBombingGun* BombingGunToSet);
 
 	UFUNCTION(BlueprintCallable, Category = Input)
-		void Fire();
+		void HandleInput();
 
 	void PutBomb();
+	void Fire();
 
 protected:
 	URobotAimingComponent * RobotAimingComponent = nullptr;
