@@ -30,11 +30,11 @@ void APlayerController_CPP::HandleInput() {
 	if (Arrow != nullptr) {
 		if (Arrow->ThisName == FString("RightArrow")) {
 			UE_LOG(LogTemp, Warning, TEXT("RIGHT!"));
-			Cast<ASelectionCube_CPP>(Arrow->GetOwner())->RotateAntiClockwise();
+			Cast<ASelectionCube_CPP>(Arrow->GetOwner())->RotateClockwise();
 		}
 		else if (Arrow->ThisName == FString("LeftArrow")) {
 			UE_LOG(LogTemp, Warning, TEXT("LEFT!"));
-			Cast<ASelectionCube_CPP>(Arrow->GetOwner())->RotateClockwise();
+			Cast<ASelectionCube_CPP>(Arrow->GetOwner())->RotateAntiClockwise();
 		}
 		else {
 			UE_LOG(LogTemp, Warning, TEXT("NOTHING"));

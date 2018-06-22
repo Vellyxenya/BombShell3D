@@ -12,16 +12,12 @@ ASelectionCube_CPP::ASelectionCube_CPP()
 
 }
 
-// Called when the game starts or when spawned
-void ASelectionCube_CPP::BeginPlay()
-{
+void ASelectionCube_CPP::BeginPlay() {
 	Super::BeginPlay();
 	
 }
 
-// Called every frame
-void ASelectionCube_CPP::Tick(float DeltaTime)
-{
+void ASelectionCube_CPP::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
 
 }
@@ -34,10 +30,12 @@ void ASelectionCube_CPP::RotateAntiClockwise() {
 	{
 		for (UStaticMeshComponent* FoundComp : Components) {
 			//FoundComp = Components[0];
-			UE_LOG(LogTemp, Warning, TEXT("found the following : %s"), *FoundComp->GetName());
+			//UE_LOG(LogTemp, Warning, TEXT("found the following : %s"), *FoundComp->GetName());
 			if (FoundComp->GetName() == FString("Cube")) {
-				UE_LOG(LogTemp, Warning, TEXT("found the following : %s"), *FoundComp->GetName());
-				FoundComp->SetRelativeRotation(FRotator(45,45, 68));
+				//UE_LOG(LogTemp, Warning, TEXT("found the following : %s"), *FoundComp->GetName());
+				//FoundComp->SetRelativeRotation(FRotator(45,45, 68));
+				OnRotateAntiClockwise.Broadcast();
+				//UE_LOG(LogTemp, Warning, TEXT("Broadcaasting anticlockwise"));
 			}
 		}
 		//UStaticMeshComponent* FoundComp = Components[0];
@@ -46,6 +44,8 @@ void ASelectionCube_CPP::RotateAntiClockwise() {
 	}
 	//GetComponentsByTag(TSubclassOf<UActorComponent> UStaticMeshComponent, FName("Core"));
 }
+
 void ASelectionCube_CPP::RotateClockwise() {
 	UE_LOG(LogTemp, Warning, TEXT("RotateClockwise!"));
+	OnRotateClockwise.Broadcast();
 }

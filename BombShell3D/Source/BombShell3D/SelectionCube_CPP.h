@@ -8,6 +8,8 @@
 
 #include "SelectionCube_CPP.generated.h"
 
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRotateAntiClockwise);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FOnRotateClockwise);
 
 UCLASS()
 class BOMBSHELL3D_API ASelectionCube_CPP : public AActor
@@ -28,6 +30,12 @@ public:
 
 	void RotateAntiClockwise();
 	void RotateClockwise();
+
+	UPROPERTY(BlueprintAssignable)
+		FOnRotateAntiClockwise OnRotateAntiClockwise;
+
+	UPROPERTY(BlueprintAssignable)
+		FOnRotateClockwise OnRotateClockwise;
 
 	UCubeArrow_CPP* RightArrow;
 	UCubeArrow_CPP* LeftArrow;
