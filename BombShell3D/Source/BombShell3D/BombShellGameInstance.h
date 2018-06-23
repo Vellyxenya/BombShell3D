@@ -41,6 +41,8 @@ public:
 	void SetGameStatus(enum GameStatus Status);
 	enum GameStatus GetGameStatus();
 
+	void SelectUI(FString UI_name);
+
 private:
 	enum GameStatus CurrentStatus;
 
@@ -48,5 +50,6 @@ private:
 	class UMainMenu_CPP* MainMenu;
 
 	TSubclassOf<class UUserWidget> UIClass;
+	TSubclassOf<class UUserWidget> Selection_UI_Class;
 	class UUI_CPP* UI;
 };

@@ -17,10 +17,22 @@ UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & Object
 	ConstructorHelpers::FClassFinder<UUserWidget> UIBPClass(TEXT("/Game/Display/UI/BombingGun_UI"));
 	if (!ensure(UIBPClass.Class != nullptr)) return;
 	UIClass = UIBPClass.Class;
+
+	ConstructorHelpers::FClassFinder<UUserWidget> Selection_UI(TEXT("/Game/Display/UI/Selection_UI"));
+	if (!ensure(Selection_UI.Class != nullptr)) return;
+	Selection_UI_Class = Selection_UI.Class;
 }
 
 void UBombShellGameInstance::SetGameStatus(enum GameStatus Status) {
+	UE_LOG(LogTemp, Warning, TEXT("Setting game status"))
 	CurrentStatus = Status;
+	if (CurrentStatus == GameStatus::SelectionMenu) {
+		if (!ensure(Selection_UI_Class != nullptr)) return;
+		UI = CreateWidget<UUI_CPP>(this, Selection_UI_Class);
+		if (!ensure(UI != nullptr)) return;
+		UI->AddToViewport(3);
+		UE_LOG(LogTemp, Warning, TEXT("DISPLAY UI from game status"));
+	}
 }
 
 GameStatus UBombShellGameInstance::GetGameStatus() {
@@ -46,9 +58,9 @@ bool UBombShellGameInstance::AskPlayerController() {/*
 
 void UBombShellGameInstance::DisplayUI() {
 	if (!ensure(UIClass != nullptr)) return;
-	UI = CreateWidget<UUI_CPP>(this, UIClass);
-	if (!ensure(UI != nullptr)) return;
-	UI->AddToViewport(2);
+	//UI = CreateWidget<UUI_CPP>(this, UIClass);
+	//if (!ensure(UI != nullptr)) return;
+	//UI->AddToViewport(2);
 	UE_LOG(LogTemp, Warning, TEXT("DISPLAY UI"));
 }
 
@@ -71,7 +83,7 @@ void UBombShellGameInstance::LoadSelectionMenu() {
 	//FInputModeGameOnly Inputmode;
 	FInputModeGameOnly Inputmode;
 	PlayerController->SetInputMode(Inputmode);
-	PlayerController->ClientTravel("/Game/Maps/SelectionMenu", ETravelType::TRAVEL_Absolute);
 	SetGameStatus(GameStatus::SelectionMenu);
+	PlayerController->ClientTravel("/Game/Maps/SelectionMenu", ETravelType::TRAVEL_Absolute);
 }
 
