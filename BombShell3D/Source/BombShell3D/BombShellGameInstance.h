@@ -13,7 +13,6 @@ enum GameStatus
 	MainMenu		UMETA(DisplayName = "MainMenu"),
 	SelectionMenu	UMETA(DisplayName = "SelectionMenu"),
 	Playing			UMETA(DisplayName = "Playing"),
-
 };
 
 UCLASS()
@@ -36,12 +35,13 @@ public:
 		void DisplayUI();
 
 	UFUNCTION(BlueprintCallable)
+		void DisplaySelectionUI();
+
+	UFUNCTION(BlueprintCallable)
 		bool AskPlayerController();
 
 	void SetGameStatus(enum GameStatus Status);
 	enum GameStatus GetGameStatus();
-
-	void SelectUI(FString UI_name);
 
 private:
 	enum GameStatus CurrentStatus;
@@ -51,5 +51,6 @@ private:
 
 	TSubclassOf<class UUserWidget> UIClass;
 	TSubclassOf<class UUserWidget> Selection_UI_Class;
+
 	class UUI_CPP* UI;
 };

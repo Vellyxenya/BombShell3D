@@ -26,13 +26,6 @@ UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & Object
 void UBombShellGameInstance::SetGameStatus(enum GameStatus Status) {
 	UE_LOG(LogTemp, Warning, TEXT("Setting game status"))
 	CurrentStatus = Status;
-	if (CurrentStatus == GameStatus::SelectionMenu) {
-		if (!ensure(Selection_UI_Class != nullptr)) return;
-		UI = CreateWidget<UUI_CPP>(this, Selection_UI_Class);
-		if (!ensure(UI != nullptr)) return;
-		UI->AddToViewport(3);
-		UE_LOG(LogTemp, Warning, TEXT("DISPLAY UI from game status"));
-	}
 }
 
 GameStatus UBombShellGameInstance::GetGameStatus() {
@@ -58,10 +51,18 @@ bool UBombShellGameInstance::AskPlayerController() {/*
 
 void UBombShellGameInstance::DisplayUI() {
 	if (!ensure(UIClass != nullptr)) return;
-	//UI = CreateWidget<UUI_CPP>(this, UIClass);
-	//if (!ensure(UI != nullptr)) return;
-	//UI->AddToViewport(2);
+	UI = CreateWidget<UUI_CPP>(this, UIClass);
+	if (!ensure(UI != nullptr)) return;
+	UI->AddToViewport(2);
 	UE_LOG(LogTemp, Warning, TEXT("DISPLAY UI"));
+}
+
+void UBombShellGameInstance::DisplaySelectionUI() {
+	if (!ensure(Selection_UI_Class != nullptr)) return;
+	UI = CreateWidget<UUI_CPP>(this, Selection_UI_Class);
+	if (!ensure(UI != nullptr)) return;
+	UI->AddToViewport(2);
+	UE_LOG(LogTemp, Warning, TEXT("DISPLAYING SELECTION UI"));
 }
 
 void UBombShellGameInstance::LoadMainMenu() {
