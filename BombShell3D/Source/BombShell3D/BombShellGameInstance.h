@@ -4,6 +4,9 @@
 
 #include "CoreMinimal.h"
 #include "Engine/GameInstance.h"
+#include "OnlineSubsystem.h" //We can't forward declare this class cause it's a pointer
+#include "OnlineSessionInterface.h"
+#include "OnlineFriendsInterface.h"
 #include "MenuInterface.h"
 #include "BombShellGameInstance.generated.h"
 
@@ -40,6 +43,9 @@ public:
 	UFUNCTION(BlueprintCallable)
 		bool AskPlayerController();
 
+	UFUNCTION()
+		void ReadListComplete(int32 number, bool Success, const FString& var1, const FString& var2);
+
 	void SetGameStatus(enum GameStatus Status);
 	enum GameStatus GetGameStatus();
 
@@ -53,4 +59,9 @@ private:
 	TSubclassOf<class UUserWidget> Selection_UI_Class;
 
 	class UUI_CPP* UI;
+
+	IOnlineSessionPtr SessionInterface;
+	IOnlineFriendsPtr FriendsInterface;
+
+	FOnReadFriendsListComplete MyDelegate;
 };

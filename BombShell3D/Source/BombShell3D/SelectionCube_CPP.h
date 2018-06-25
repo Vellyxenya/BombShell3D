@@ -24,12 +24,14 @@ protected:
 	// Called when the game starts or when spawned
 	virtual void BeginPlay() override;
 
+	int32 NumberOfOptions;
+
 public:	
 	// Called every frame
 	virtual void Tick(float DeltaTime) override;
 
-	void RotateAntiClockwise();
-	void RotateClockwise();
+	virtual void RotateAntiClockwise();
+	virtual void RotateClockwise();
 
 	UPROPERTY(BlueprintAssignable)
 		FOnRotateAntiClockwise OnRotateAntiClockwise;

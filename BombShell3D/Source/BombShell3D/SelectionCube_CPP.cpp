@@ -14,12 +14,11 @@ ASelectionCube_CPP::ASelectionCube_CPP()
 
 void ASelectionCube_CPP::BeginPlay() {
 	Super::BeginPlay();
-	
+
 }
 
 void ASelectionCube_CPP::Tick(float DeltaTime) {
 	Super::Tick(DeltaTime);
-
 }
 
 void ASelectionCube_CPP::RotateAntiClockwise() {

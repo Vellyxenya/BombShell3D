@@ -9,6 +9,15 @@
 #include "UI_CPP.h"
 #include "PlayerController_CPP.h"
 
+#include "OnlineSubsystem.h"
+#include "OnlineSessionSettings.h"
+#include "UnrealNames.h"
+
+//const static FName SESSION_NAME = TEXT("My Session Game");
+const static FName SESSION_NAME = EName::NAME_GameSession; //This fixes the engine bug in which public connections doesn't get updated
+const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName");
+
+
 UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & ObjectInitializer) {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/Menus/MainMenu_BP"));
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
@@ -33,11 +42,38 @@ GameStatus UBombShellGameInstance::GetGameStatus() {
 }
 
 void UBombShellGameInstance::Init() {
-	UE_LOG(LogTemp, Warning, TEXT("MainMenuClassName : %s"), *MainMenuClass->GetName());
+	//UE_LOG(LogTemp, Warning, TEXT("MainMenuClassName : %s"), *MainMenuClass->GetName());
+	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
+	FriendsInterface = OnlineSubsystem->GetFriendsInterface();
+	//TArray< TSharedRef<FOnlineFriend> > FriendList;
+	int32 PlayerId = 0;
+	if (FriendsInterface.IsValid()) {
+		FriendsInterface->ReadFriendsList(PlayerId, EFriendsLists::ToString(EFriendsLists::Default));
+		UE_LOG(LogTemp, Warning, TEXT("in if is valid"));
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("in if is not valid"));
+	}
+	//MyDelegate.BindUFunction(this, "ReadListComplete");
+	//FriendListReadCompleteDelegate(FOnReadFriendsListComplete::CreateUObject(this, &ThisClass::OnReadFriendsListCompleted))
+	if (OnlineSubsystem != nullptr) {
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem : %s"), *OnlineSubsystem->GetSubsystemName().ToString());
+		SessionInterface = OnlineSubsystem->GetSessionInterface();
+		if (SessionInterface.IsValid()) {
+			//SessionInterface->OnCreateSessionCompleteDelegates.AddUObject(this, &UPuzzleGameInstance::OnCreateSessionComplete);
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem is a nullptr"));
+	}
 }
 
-bool UBombShellGameInstance::AskPlayerController() {/*
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
+void UBombShellGameInstance::ReadListComplete(int32 number, bool Success, const FString& var1, const FString& var2) {
+	UE_LOG(LogTemp, Warning, TEXT("Read friendlist complete"))
+}
+
+bool UBombShellGameInstance::AskPlayerController() {
+	/*APlayerController* PlayerController = GetFirstLocalPlayerController();
 	//if (!ensure(PlayerController != nullptr)) return false;
 	//return Cast<APlayerController_CPP>(PlayerController)->bCanPutBomb;
 	if (PlayerController != nullptr) {
