@@ -12,11 +12,15 @@
 #include "OnlineSubsystem.h"
 #include "OnlineSessionSettings.h"
 #include "UnrealNames.h"
+#include "Kismet/GameplayStatics.h"
+
+#include "Engine/Texture2D.h"
 
 //const static FName SESSION_NAME = TEXT("My Session Game");
 const static FName SESSION_NAME = EName::NAME_GameSession; //This fixes the engine bug in which public connections doesn't get updated
 const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName");
 
+class FOnlineUserPresence;
 
 UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & ObjectInitializer) {
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/Menus/MainMenu_BP"));
@@ -30,6 +34,8 @@ UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & Object
 	ConstructorHelpers::FClassFinder<UUserWidget> Selection_UI(TEXT("/Game/Display/UI/Selection_UI"));
 	if (!ensure(Selection_UI.Class != nullptr)) return;
 	Selection_UI_Class = Selection_UI.Class;
+
+	FriendListReadCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UBombShellGameInstance::ReadListComplete);
 }
 
 void UBombShellGameInstance::SetGameStatus(enum GameStatus Status) {
@@ -42,21 +48,31 @@ GameStatus UBombShellGameInstance::GetGameStatus() {
 }
 
 void UBombShellGameInstance::Init() {
+	Super::Init();
+	OnlineSubsystem = IOnlineSubsystem::Get(FName("Steam"));
+	
 	//UE_LOG(LogTemp, Warning, TEXT("MainMenuClassName : %s"), *MainMenuClass->GetName());
-	IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get();
-	FriendsInterface = OnlineSubsystem->GetFriendsInterface();
-	//TArray< TSharedRef<FOnlineFriend> > FriendList;
-	int32 PlayerId = 0;
-	if (FriendsInterface.IsValid()) {
-		FriendsInterface->ReadFriendsList(PlayerId, EFriendsLists::ToString(EFriendsLists::Default));
-		UE_LOG(LogTemp, Warning, TEXT("in if is valid"));
+	/*IOnlineSubsystem* OnlineSubsystem = IOnlineSubsystem::Get(FName("Steam"));
+	if (OnlineSubsystem != nullptr) {
+		FriendsInterface = OnlineSubsystem->GetFriendsInterface();
+		int32 PlayerId = 0;
+		if (FriendsInterface.IsValid()) {
+			MyDelegate.BindUFunction(this, "ReadListComplete");
+			//FriendsInterface->ReadFriendsList(PlayerId, EFriendsLists::ToString(EFriendsLists::Default), MyDelegate);
+
+			UE_LOG(LogTemp, Warning, TEXT("in if is valid"));
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("in if is not valid"));
+		}
 	}
 	else {
-		UE_LOG(LogTemp, Warning, TEXT("in if is not valid"));
-	}
-	//MyDelegate.BindUFunction(this, "ReadListComplete");
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem is a nullptr, try launching a standalone game or from PowerShell"));
+	}*/
+
+	//TArray< TSharedRef<FOnlineFriend> > FriendList;
 	//FriendListReadCompleteDelegate(FOnReadFriendsListComplete::CreateUObject(this, &ThisClass::OnReadFriendsListCompleted))
-	if (OnlineSubsystem != nullptr) {
+	/*if (OnlineSubsystem != nullptr) {
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem : %s"), *OnlineSubsystem->GetSubsystemName().ToString());
 		SessionInterface = OnlineSubsystem->GetSessionInterface();
 		if (SessionInterface.IsValid()) {
@@ -65,11 +81,18 @@ void UBombShellGameInstance::Init() {
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem is a nullptr"));
-	}
+	}*/
+	
 }
 
-void UBombShellGameInstance::ReadListComplete(int32 number, bool Success, const FString& var1, const FString& var2) {
-	UE_LOG(LogTemp, Warning, TEXT("Read friendlist complete"))
+void UBombShellGameInstance::ReadListComplete(int32 LocalUserNumber, bool Success, const FString& ListName, const FString& Error) {
+	if (Success) {
+		UE_LOG(LogTemp, Warning, TEXT("Read friendlist complete"));
+
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("Read friendlist failed"));
+	}
 }
 
 bool UBombShellGameInstance::AskPlayerController() {
@@ -86,11 +109,13 @@ bool UBombShellGameInstance::AskPlayerController() {
 }
 
 void UBombShellGameInstance::DisplayUI() {
+
 	if (!ensure(UIClass != nullptr)) return;
 	UI = CreateWidget<UUI_CPP>(this, UIClass);
 	if (!ensure(UI != nullptr)) return;
 	UI->AddToViewport(2);
 	UE_LOG(LogTemp, Warning, TEXT("DISPLAY UI"));
+	
 }
 
 void UBombShellGameInstance::DisplaySelectionUI() {
@@ -111,7 +136,7 @@ void UBombShellGameInstance::LoadMainMenu() {
 }
 
 void UBombShellGameInstance::LoadSelectionMenu() {
-	APlayerController* PlayerController = GetFirstLocalPlayerController();
+	PlayerController = GetFirstLocalPlayerController();
 	if (!ensure(PlayerController != nullptr)) return;
 	PlayerController->bShowMouseCursor = true;
 	PlayerController->bEnableClickEvents = true;
@@ -121,6 +146,34 @@ void UBombShellGameInstance::LoadSelectionMenu() {
 	FInputModeGameOnly Inputmode;
 	PlayerController->SetInputMode(Inputmode);
 	SetGameStatus(GameStatus::SelectionMenu);
+	SetupOnlineSystem(PlayerController);
 	PlayerController->ClientTravel("/Game/Maps/SelectionMenu", ETravelType::TRAVEL_Absolute);
 }
 
+void UBombShellGameInstance::SetupOnlineSystem(APlayerController *PlayerController) {
+	if (OnlineSubsystem != nullptr) {
+		FriendsInterface = OnlineSubsystem->GetFriendsInterface();
+		if (FriendsInterface.IsValid()) {
+			UE_LOG(LogTemp, Warning, TEXT("friendinterface valid"));
+
+			//PlayerController = Cast<APlayerController_CPP>(GetWorld()->GetFirstPlayerController());
+			APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+			if (PlayerController != nullptr) {
+				UE_LOG(LogTemp, Warning, TEXT("Playercontroller not nullptr"));
+				ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(PlayerController->Player);
+				if (LocalPlayer) {
+					FriendsInterface->ReadFriendsList(LocalPlayer->GetControllerId(), EFriendsLists::ToString((EFriendsLists::Default)), FriendListReadCompleteDelegate);
+				}
+			}
+			else {
+				UE_LOG(LogTemp, Warning, TEXT("Playercontroller is nullptr"));
+			}
+		}
+		else {
+			UE_LOG(LogTemp, Warning, TEXT("friendinterface not valid"));
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem is a nullptr, try launching a standalone game or from PowerShell"));
+	}
+}

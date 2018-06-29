@@ -9,6 +9,9 @@
 #include "PlayerController_CPP.h"
 #include "Bomb.h"
 #include "BombShellGameInstance.h"
+#include "Kismet/GameplayStatics.h"
+#include "SavingSystem.h"
+#include "Soul.h"
 
 ARobot::ARobot() {
 	PrimaryActorTick.bCanEverTick = true;
@@ -19,6 +22,16 @@ ARobot::ARobot() {
 void ARobot::SetBombingGunReference(UBombingGun * BombingGunToSet) {
 	RobotAimingComponent->SetBombingGunReference(BombingGunToSet);
 	BombingGun = BombingGunToSet;
+}
+
+void ARobot::SetSoulReference(ASoul* SoulToSet) {
+	Soul = SoulToSet;
+}
+
+void ARobot::PossessSoul() {
+	APlayerController_CPP* PlayerController = Cast<APlayerController_CPP>(GetController());
+	PlayerController->UnPossess();
+	PlayerController->Possess(Soul);
 }
 
 void ARobot::HandleInput() {
@@ -62,4 +75,11 @@ void ARobot::PutBomb() {
 
 void ARobot::AimAt(FVector HitLocation) {
 	RobotAimingComponent->AimAt(HitLocation, LaunchSpeed);
+}
+
+void ARobot::SaveVariables() {
+	PlayerName = TEXT("PlayerOne");
+	USavingSystem* SaveGameInstance = Cast<USavingSystem>(UGameplayStatics::CreateSaveGameObject(USavingSystem::StaticClass()));
+	SaveGameInstance->PlayerName = PlayerName;
+	UGameplayStatics::SaveGameToSlot(SaveGameInstance, SaveGameInstance->SaveSlotName, SaveGameInstance->UserIndex);
 }

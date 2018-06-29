@@ -94,19 +94,6 @@ bool APlayerController_CPP::GetLookVectorHitLocation(FVector LookDirection, OUT 
 		ECollisionChannel::ECC_Visibility)) {
 		HitLocation = HitResult.Location;
 		InHitResult = HitResult_Function;
-		//UE_LOG(LogTemp, Warning, TEXT("HitResult : %s"), *HitResult.GetComponent()->GetClass()->GetName());
-		/*Arrow = Cast<UCubeArrow_CPP>(HitResult.GetComponent());
-		if (Arrow != nullptr) {
-			if (Arrow->ThisName == FString("RightArrow")) {
-				UE_LOG(LogTemp, Warning, TEXT("RIGHT!"));
-			}
-			else if (Arrow->ThisName == FString("LeftArrow")) {
-				UE_LOG(LogTemp, Warning, TEXT("LEFT!"));
-			}
-			else {
-				UE_LOG(LogTemp, Warning, TEXT("NOTHING"));
-			}
-		}*/
 		return true;
 	}
 	HitLocation = FVector(0);

@@ -8,6 +8,7 @@
 
 class URobotAimingComponent;
 class UBombingGun;
+class ASoul;
 
 UCLASS()
 class BOMBSHELL3D_API ARobot : public ABombShell3DCharacter
@@ -21,6 +22,8 @@ public:
 
 	UFUNCTION(BlueprintCallable, Category = Setup)
 		void SetBombingGunReference(UBombingGun* BombingGunToSet);
+	UFUNCTION(BlueprintCallable, Category = Setup)
+		void SetSoulReference(ASoul* Soul);
 
 	UFUNCTION(BlueprintCallable, Category = Input)
 		void HandleInput();
@@ -28,10 +31,20 @@ public:
 	void PutBomb();
 	void Fire();
 
+	void SaveVariables();
+
+	UFUNCTION(BlueprintCallable)
+		void PossessSoul();
+
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	ASoul* Soul = nullptr;
+
 protected:
 	URobotAimingComponent * RobotAimingComponent = nullptr;
 
 private:
+	FString PlayerName;
+
 	double LastFireTime = 0;
 
 	UPROPERTY(EditDefaultsOnly, Category = Firing)

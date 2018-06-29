@@ -10,6 +10,8 @@
 #include "MenuInterface.h"
 #include "BombShellGameInstance.generated.h"
 
+class UTexture2D;
+
 UENUM()
 enum GameStatus
 {
@@ -24,6 +26,7 @@ class BOMBSHELL3D_API UBombShellGameInstance : public UGameInstance, public IMen
 	GENERATED_BODY()
 	
 public:
+	UBombShellGameInstance();
 	UBombShellGameInstance(const FObjectInitializer & ObjectInitializer);
 	
 	virtual void Init();
@@ -63,5 +66,11 @@ private:
 	IOnlineSessionPtr SessionInterface;
 	IOnlineFriendsPtr FriendsInterface;
 
-	FOnReadFriendsListComplete MyDelegate;
+	FOnReadFriendsListComplete FriendListReadCompleteDelegate;
+	APlayerController* PlayerController;
+
+	IOnlineSubsystem* OnlineSubsystem;
+	void SetupOnlineSystem(class APlayerController *PlayerController);
+
+	//UTexture2D* GetSteamAvatar(const FBPUniqueNetId UniqueNetId);
 };
