@@ -13,8 +13,20 @@
 #include "OnlineSessionSettings.h"
 #include "UnrealNames.h"
 #include "Kismet/GameplayStatics.h"
-
 #include "Engine/Texture2D.h"
+
+//we include the steam api here to be able to get the steam avatar
+//refresh your visual studio files from editor after adding this to avoid weird redline errors
+#if PLATFORM_WINDOWS || PLATFORM_MAC || PLATFORM_LINUX
+
+#pragma push_macro("ARRAY_COUNT")
+#undef ARRAY_COUNT
+
+#include <steam/steam_api.h>
+
+#pragma pop_macro("ARRAY_COUNT")
+
+#endif
 
 //const static FName SESSION_NAME = TEXT("My Session Game");
 const static FName SESSION_NAME = EName::NAME_GameSession; //This fixes the engine bug in which public connections doesn't get updated
@@ -35,7 +47,7 @@ UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & Object
 	if (!ensure(Selection_UI.Class != nullptr)) return;
 	Selection_UI_Class = Selection_UI.Class;
 
-	FriendListReadCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UBombShellGameInstance::ReadListComplete);
+	FriendListReadCompleteDelegate = FOnReadFriendsListComplete::CreateUObject(this, &UBombShellGameInstance::OnReadFriendsListCompleted);
 }
 
 void UBombShellGameInstance::SetGameStatus(enum GameStatus Status) {
@@ -127,6 +139,7 @@ void UBombShellGameInstance::DisplaySelectionUI() {
 }
 
 void UBombShellGameInstance::LoadMainMenu() {
+	UE_LOG(LogTemp, Warning, TEXT("Loading Main Menu"))
 	if (!ensure(MainMenuClass != nullptr)) return;
 	MainMenu = CreateWidget<UMainMenu_CPP>(this, MainMenuClass);
 	if (!ensure(MainMenu != nullptr)) return;
@@ -157,7 +170,7 @@ void UBombShellGameInstance::SetupOnlineSystem(APlayerController *PlayerControll
 			UE_LOG(LogTemp, Warning, TEXT("friendinterface valid"));
 
 			//PlayerController = Cast<APlayerController_CPP>(GetWorld()->GetFirstPlayerController());
-			APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
+			//APlayerController* PlayerController = GetWorld()->GetFirstPlayerController();
 			if (PlayerController != nullptr) {
 				UE_LOG(LogTemp, Warning, TEXT("Playercontroller not nullptr"));
 				ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(PlayerController->Player);
@@ -175,5 +188,157 @@ void UBombShellGameInstance::SetupOnlineSystem(APlayerController *PlayerControll
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem is a nullptr, try launching a standalone game or from PowerShell"));
+	}
+}
+
+UTexture2D* UBombShellGameInstance::GetSteamAvatar(const FBPUniqueNetId UniqueNetId)
+{
+	if (UniqueNetId.IsValid())
+	{
+		uint32 Width = 0;
+		uint32 Height = 0;
+
+		//get the player iID
+		uint64 id = *((uint64*)UniqueNetId.UniqueNetId->GetBytes());
+
+		int Picture = 0;
+
+		// get the Avatar ID using the player ID
+		Picture = SteamFriends()->GetMediumFriendAvatar(id);
+
+		//if the Avatar ID is not valid retrun null
+		if (Picture == -1)
+			return nullptr;
+
+		//get the image size from steam
+		SteamUtils()->GetImageSize(Picture, &Width, &Height);
+
+		// if the image size is valid (most of this is from the Advanced Seesion Plugin as well, mordentral, THANK YOU!
+		if (Width > 0 && Height > 0)
+		{
+			//Creating the buffer "oAvatarRGBA" and then filling it with the RGBA Stream from the Steam Avatar
+			uint8 *oAvatarRGBA = new uint8[Width * Height * 4];
+
+
+			//Filling the buffer with the RGBA Stream from the Steam Avatar and creating a UTextur2D to parse the RGBA Steam in
+			SteamUtils()->GetImageRGBA(Picture, (uint8*)oAvatarRGBA, 4 * Height * Width * sizeof(char));
+
+			UTexture2D* Avatar = UTexture2D::CreateTransient(Width, Height, PF_R8G8B8A8);
+
+			// Switched to a Memcpy instead of byte by byte transer
+			uint8* MipData = (uint8*)Avatar->PlatformData->Mips[0].BulkData.Lock(LOCK_READ_WRITE);
+			FMemory::Memcpy(MipData, (void*)oAvatarRGBA, Height * Width * 4);
+			Avatar->PlatformData->Mips[0].BulkData.Unlock();
+
+			// Original implementation was missing this!!
+			// the hell man......
+			// deallocating the memory used to get the avatar data
+			delete[] oAvatarRGBA;
+
+			//Setting some Parameters for the Texture and finally returning it
+			Avatar->PlatformData->NumSlices = 1;
+			Avatar->NeverStream = true;
+			//Avatar->CompressionSettings = TC_EditorIcon;
+
+			Avatar->UpdateResource();
+
+			return Avatar;
+		}
+
+	}
+	return nullptr;
+}
+
+void UBombShellGameInstance::GetSteamFriendsList(APlayerController *PlayerController)
+{
+	//check if the player controller is valid
+	if (PlayerController)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Player controller Valid, In getsteamfriendslist"))
+		//get the steam online subsystem
+		IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get(FName("Steam"));
+
+		//check if the online subsystem is valid
+		if (OnlineSub)
+		{
+			UE_LOG(LogTemp, Warning, TEXT("Online Subsys Valid, In getsteamfriendslist"))
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, TEXT("Found Steam Online"));
+			//get Friends interface
+			IOnlineFriendsPtr FriendsInterface = OnlineSub->GetFriendsInterface();
+
+			//if the Friends Interface is valid
+			if (FriendsInterface.IsValid())
+			{
+				UE_LOG(LogTemp, Warning, TEXT("friend interface Valid, In getsteamfriendslist"))
+
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Blue, TEXT("Found friend interface"));
+				// get the local player from the player controller
+				ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(PlayerController->Player);
+
+				//chaeck if the local player exists
+				if (LocalPlayer)
+				{
+					//read the friend list from the online subsystem then call the delagate when completed
+					FriendsInterface->ReadFriendsList(LocalPlayer->GetControllerId(), EFriendsLists::ToString((EFriendsLists::InGamePlayers)), FriendListReadCompleteDelegate);
+				}
+			}
+		}
+	}
+}
+
+
+// when reading friend list from the online subsystem is finished, get it and store it then call blueprint to show it on UMG
+void UBombShellGameInstance::OnReadFriendsListCompleted(int32 LocalUserNum, bool bWasSuccessful, const FString & ListName, const FString & ErrorString)
+{
+	UE_LOG(LogTemp, Warning, TEXT("Onreadlfriendslistcompleted done"));
+
+	if (bWasSuccessful)
+	{
+		UE_LOG(LogTemp, Warning, TEXT("Onreadlfriendslistcompleted done, SUCCESSFULL"));
+		//get the steam online subsystem
+		IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get(FName("Steam"));
+
+		//check if the online subsystem is valid
+		if (OnlineSub)
+		{
+			//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, TEXT("Found Steam Online"));
+			//get Friends interface
+			IOnlineFriendsPtr FriendsInterface = OnlineSub->GetFriendsInterface();
+
+			//if the Friends Interface is valid
+			if (FriendsInterface.IsValid())
+			{
+
+				TArray< TSharedRef<FOnlineFriend> > FriendList;
+				//get a list on all online players and store them in the FriendList
+				FriendsInterface->GetFriendsList(LocalUserNum, ListName/*EFriendsLists::ToString((EFriendsLists::Default)),*/, FriendList);
+
+				//GEngine->AddOnScreenDebugMessage(-1, 5.0f, FColor::Emerald, *FString::Printf(TEXT("Number of friends found is: %d"), FriendList.Num()));
+
+				TArray<FSteamFriendInfo> BPFriendsList;
+				//for each loop to convert the FOnlineFriend array into the cuteom BP struct
+				for (TSharedRef<FOnlineFriend> Friend : FriendList)
+				{
+					//temp FSteamFriendInfo variable to add to the array
+					FSteamFriendInfo TempSteamFriendInfo;
+					//get the friend's User ID
+					TempSteamFriendInfo.PlayerUniqueNetID.SetUniqueNetId(Friend->GetUserId());
+					//get the friend's avatar as texture 2D and store it
+					TempSteamFriendInfo.PlayerAvatar = GetSteamAvatar(TempSteamFriendInfo.PlayerUniqueNetID);
+					//get the friend's display name
+					TempSteamFriendInfo.PlayerName = Friend->GetDisplayName();
+					//add the temp variable to the 
+					BPFriendsList.Add(TempSteamFriendInfo);
+					UE_LOG(LogTemp, Warning, TEXT("Iteration ..."));
+				}
+				UE_LOG(LogTemp, Warning, TEXT("SUCCESS 2"));
+
+				//call blueprint to show the info on UMG
+				OnGetSteamFriendRequestCompleteUMG(BPFriendsList);
+			}
+		}
+	}
+	else {
+		UE_LOG(LogTemp, Error, TEXT("ShowErrorMessageUMG(FText::FromString(ErrorString));"));
 	}
 }
