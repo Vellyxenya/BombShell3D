@@ -249,8 +249,24 @@ UTexture2D* UBombShellGameInstance::GetSteamAvatar(const FBPUniqueNetId UniqueNe
 	return nullptr;
 }
 
+void UBombShellGameInstance::SendSessionInviteToFriend(APlayerController* InvitingPlayer, const FBPUniqueNetId & Friend) {
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub) {
+		ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(InvitingPlayer->GetLocalPlayer());
+		if (LocalPlayer) {
+			// Get SessionInterface from the OnlineSubsystem
+			IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+			if (Sessions.IsValid() && LocalPlayer->GetPreferredUniqueNetId().IsValid() && Friend.IsValid()) {
+				Sessions->SendSessionInviteToFriend(*LocalPlayer->GetPreferredUniqueNetId(), /*GameSessionName*/SESSION_NAME, *Friend.GetUniqueNetId());
+				UE_LOG(LogTemp, Warning, TEXT("Invite successfully sent"))
+			}
+		}
+	}
+}
+
 void UBombShellGameInstance::GetSteamFriendsList(APlayerController *PlayerController)
 {
+	UE_LOG(LogTemp, Warning, TEXT("In Function : GetSteamFriendsList"))
 	//check if the player controller is valid
 	if (PlayerController)
 	{

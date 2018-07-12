@@ -207,4 +207,8 @@ public:
 	*/
 	UFUNCTION(BlueprintImplementableEvent, Category = "Network|Friends")
 		void OnGetSteamFriendRequestCompleteUMG(const TArray<FSteamFriendInfo>& BPFriendsLists);
+
+
+	UFUNCTION(BlueprintCallable, Category = "Network|Friends")
+		void SendSessionInviteToFriend(APlayerController* InvitingPlayer, const FBPUniqueNetId & Friend);
 };
