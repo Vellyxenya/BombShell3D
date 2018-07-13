@@ -35,6 +35,9 @@ const static FName SERVER_NAME_SETTINGS_KEY = TEXT("ServerName");
 class FOnlineUserPresence;
 
 UBombShellGameInstance::UBombShellGameInstance(const FObjectInitializer & ObjectInitializer) {
+	OnCreateSessionCompleteDelegate = FOnCreateSessionCompleteDelegate::CreateUObject(this, &UBombShellGameInstance::OnCreateSessionComplete);
+	OnStartSessionCompleteDelegate = FOnStartSessionCompleteDelegate::CreateUObject(this, &UBombShellGameInstance::OnStartOnlineGameComplete);
+
 	ConstructorHelpers::FClassFinder<UUserWidget> MenuBPClass(TEXT("/Game/Menus/MainMenu_BP"));
 	if (!ensure(MenuBPClass.Class != nullptr)) return;
 	MainMenuClass = MenuBPClass.Class;
@@ -188,6 +191,111 @@ void UBombShellGameInstance::SetupOnlineSystem(APlayerController *PlayerControll
 	}
 	else {
 		UE_LOG(LogTemp, Warning, TEXT("OnlineSubsystem is a nullptr, try launching a standalone game or from PowerShell"));
+	}
+}
+
+void UBombShellGameInstance::StartOnlineGame(FString ServerName, int32 MaxNumPlayers, bool bIsLAN, bool bIsPresence, bool bIsPasswordProtected, FString SessionPassword) {
+	// Creating a local player where we can get the UserID from
+	ULocalPlayer* const Player = GetFirstGamePlayer();
+
+	// Call our custom HostSession function. GameSessionName is a GameInstance variable
+	HostSession(Player->GetPreferredUniqueNetId(), SESSION_NAME /*GameSessionName*/, ServerName, bIsLAN, bIsPresence, MaxNumPlayers, bIsPasswordProtected, SessionPassword);
+}
+
+bool UBombShellGameInstance::HostSession(TSharedPtr<const FUniqueNetId> UserId, FName SessionName, FString ServerName, bool bIsLAN, bool bIsPresence, int32 MaxNumPlayers, bool bIsPasswordProtected, FString SessionPassword) {
+	IOnlineSubsystem* const OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub) {
+		// Get the Session Interface, so we can call the "CreateSession" function on it
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		if (Sessions.IsValid() && UserId.IsValid())
+		{
+			/*Fill in all the Session Settings that we want to use.
+			There are more with SessionSettings.Set(...);
+			For example the Map or the GameMode/Type.*/
+
+			SessionSettings = MakeShareable(new FOnlineSessionSettings());
+			SessionSettings->bIsLANMatch = bIsLAN;
+			SessionSettings->bUsesPresence = bIsPresence;
+			SessionSettings->NumPublicConnections = MaxNumPlayers;
+			MaxPlayersInSession = MaxNumPlayers;
+			SessionSettings->NumPrivateConnections = 0;
+			SessionSettings->bAllowInvites = true;
+			SessionSettings->bAllowJoinInProgress = true;
+			SessionSettings->bShouldAdvertise = true;
+			SessionSettings->bAllowJoinViaPresence = true;
+			SessionSettings->bAllowJoinViaPresenceFriendsOnly = false;
+			//setting a value in the FOnlineSessionSetting's settings array
+			SessionSettings->Set(SETTING_MAPNAME, LobbyMapName.ToString(), EOnlineDataAdvertisementType::ViaOnlineService);
+
+			//Making a temporary FOnlineSessionSetting variable to hold the data we want to add to the FOnlineSessionSetting's settings array
+			FOnlineSessionSetting ExtraSessionSetting;
+			ExtraSessionSetting.AdvertisementType = EOnlineDataAdvertisementType::ViaOnlineService;
+
+			//setting the temporary data to the ServerName we got from UMG
+			ExtraSessionSetting.Data = ServerName;
+
+			//adding the Server Name value in the FOnlineSessionSetting 's settings array using the key defined in header
+			//the key can be any FNAME but we define it to avoid mistakes
+			SessionSettings->Settings.Add(SETTING_SERVER_NAME, ExtraSessionSetting);
+
+			//setting the temporary data to the bIsPasswordProtected we got from UMG
+			ExtraSessionSetting.Data = bIsPasswordProtected;
+			//adding the bIsPasswordProtected value in the FOnlineSessionSetting 's settings array using the key defined in header
+			SessionSettings->Settings.Add(SETTING_SERVER_IS_PROTECTED, ExtraSessionSetting);
+
+
+			//setting the temporary data to the Password we got from UMG
+			ExtraSessionSetting.Data = SessionPassword;
+			//adding the Password value in the FOnlineSessionSetting 's settings array using the key defined in header
+			SessionSettings->Settings.Add(SETTING_SERVER_PROTECT_PASSWORD, ExtraSessionSetting);
+
+
+
+			// Set the delegate to the Handle of the SessionInterface
+			OnCreateSessionCompleteDelegateHandle = Sessions->AddOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegate);
+			// Our delegate should get called when this is complete (doesn't need to be successful!)
+			return Sessions->CreateSession(*UserId, SessionName, *SessionSettings);
+		}
+	} else {
+		GEngine->AddOnScreenDebugMessage(-1, 10.f, FColor::Red, TEXT("No Online Subsytem found!"));
+	}
+	return false;
+}
+
+void UBombShellGameInstance::OnCreateSessionComplete(FName SessionName, bool bWasSuccessful) {
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub) {
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		if (Sessions.IsValid()) {
+			// Clear the SessionComplete delegate handle, since we finished this call
+			Sessions->ClearOnCreateSessionCompleteDelegate_Handle(OnCreateSessionCompleteDelegateHandle);
+			if (bWasSuccessful) {
+				// Set the StartSession delegate handle
+				OnStartSessionCompleteDelegateHandle = Sessions->AddOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegate);
+				// The StartSessionComplete delegate should get called after this
+				Sessions->StartSession(SessionName);
+			}
+		}
+
+	}
+}
+
+void UBombShellGameInstance::OnStartOnlineGameComplete(FName SessionName, bool bWasSuccessful) {
+	IOnlineSubsystem* OnlineSub = IOnlineSubsystem::Get();
+	if (OnlineSub) {
+		// Get the Session Interface to clear the Delegate
+		IOnlineSessionPtr Sessions = OnlineSub->GetSessionInterface();
+		if (Sessions.IsValid())
+		{
+			// Clear the delegate, since we are done with this call
+			Sessions->ClearOnStartSessionCompleteDelegate_Handle(OnStartSessionCompleteDelegateHandle);
+		}
+	}
+	// If the start was successful, we can open a NewMap if we want. Make sure to use "listen" as a parameter!
+	if (bWasSuccessful)
+	{
+		UGameplayStatics::OpenLevel(GetWorld(), LobbyMapName, true, "listen");
+		UE_LOG(LogTemp, Warning, TEXT("LISTENING!!!"))
 	}
 }
 
