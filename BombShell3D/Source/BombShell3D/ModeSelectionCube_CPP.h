@@ -21,7 +21,9 @@ public:
 	// Sets default values for this actor's properties
 	AModeSelectionCube_CPP();
 
-	int32 CurrentOptionIndex = 0;
+	UPROPERTY(BlueprintReadOnly)
+		int32 CurrentOptionIndex = 0;
+
 	TArray<FString> PlayOptions;
 
 protected:

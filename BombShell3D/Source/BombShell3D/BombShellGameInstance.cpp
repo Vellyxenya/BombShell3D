@@ -178,7 +178,8 @@ void UBombShellGameInstance::SetupOnlineSystem(APlayerController *PlayerControll
 				UE_LOG(LogTemp, Warning, TEXT("Playercontroller not nullptr"));
 				ULocalPlayer* LocalPlayer = Cast<ULocalPlayer>(PlayerController->Player);
 				if (LocalPlayer) {
-					FriendsInterface->ReadFriendsList(LocalPlayer->GetControllerId(), EFriendsLists::ToString((EFriendsLists::Default)), FriendListReadCompleteDelegate);
+					//This next line seems to be initiating the steam friends query mechanism, and it works, even if not intended ;)
+					//FriendsInterface->ReadFriendsList(LocalPlayer->GetControllerId(), EFriendsLists::ToString((EFriendsLists::Default)), FriendListReadCompleteDelegate);
 				}
 			}
 			else {
@@ -299,10 +300,8 @@ void UBombShellGameInstance::OnStartOnlineGameComplete(FName SessionName, bool b
 	}
 }
 
-UTexture2D* UBombShellGameInstance::GetSteamAvatar(const FBPUniqueNetId UniqueNetId)
-{
-	if (UniqueNetId.IsValid())
-	{
+UTexture2D* UBombShellGameInstance::GetSteamAvatar(const FBPUniqueNetId UniqueNetId) {
+	if (UniqueNetId.IsValid()) {
 		uint32 Width = 0;
 		uint32 Height = 0;
 
@@ -322,8 +321,7 @@ UTexture2D* UBombShellGameInstance::GetSteamAvatar(const FBPUniqueNetId UniqueNe
 		SteamUtils()->GetImageSize(Picture, &Width, &Height);
 
 		// if the image size is valid (most of this is from the Advanced Seesion Plugin as well, mordentral, THANK YOU!
-		if (Width > 0 && Height > 0)
-		{
+		if (Width > 0 && Height > 0) {
 			//Creating the buffer "oAvatarRGBA" and then filling it with the RGBA Stream from the Steam Avatar
 			uint8 *oAvatarRGBA = new uint8[Width * Height * 4];
 
@@ -352,7 +350,6 @@ UTexture2D* UBombShellGameInstance::GetSteamAvatar(const FBPUniqueNetId UniqueNe
 
 			return Avatar;
 		}
-
 	}
 	return nullptr;
 }
